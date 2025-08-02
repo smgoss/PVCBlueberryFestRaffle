@@ -54,7 +54,6 @@ export default function Home() {
             <div className="absolute inset-0 bg-black/40 rounded-2xl"></div>
             <div className="relative text-center text-white px-4 z-10">
               <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-                <Gift className="text-church-gold mr-2" size={24} />
                 Blueberry Festival Raffle
               </h1>
               <p className="text-lg opacity-90">
