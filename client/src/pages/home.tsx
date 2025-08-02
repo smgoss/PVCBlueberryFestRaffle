@@ -54,25 +54,29 @@ export default function Home() {
         {/* Entry Form */}
         <RaffleEntryForm />
 
-        {/* Festival Info */}
+        {/* Church Info */}
         <Card className="shadow-xl">
           <CardContent className="p-6 sm:p-8">
             <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-              <i className="fas fa-calendar-alt text-church-gold mr-2"></i>
-              Festival Information
+              <i className="fas fa-church text-church-gold mr-2"></i>
+              Church Information
             </h3>
             <div className="space-y-4 text-gray-600">
-              <div className="flex items-center space-x-3">
-                <i className="fas fa-map-marker-alt text-blueberry-500"></i>
-                <span>Pathway Vineyard Church GNG Campus</span>
+              <div className="flex items-start space-x-3">
+                <i className="fas fa-map-marker-alt text-blueberry-500 mt-1"></i>
+                <div>
+                  <div className="font-medium">Pathway Vineyard Church GNG Campus</div>
+                  <div>Burchard A. Dunn School</div>
+                  <div>667 Morse Rd, New Gloucester, ME 04260</div>
+                </div>
               </div>
               <div className="flex items-center space-x-3">
                 <i className="fas fa-clock text-blueberry-500"></i>
-                <span>Saturday, July 15th - 10:00 AM to 4:00 PM</span>
+                <span>Sundays at 9:30 AM</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <i className="fas fa-gift text-blueberry-500"></i>
-                <span>Amazing prizes and blueberry treats await!</span>
+              <div className="flex items-start space-x-3">
+                <i className="fas fa-users text-blueberry-500 mt-1"></i>
+                <span>Children's program for kids 6 months through 5th grade</span>
               </div>
             </div>
           </CardContent>
