@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { RaffleEntry, Prize, WinnerWithDetails } from "@shared/schema";
+import { Download, Users, Gift, Trophy, Dices, Plus, Search, Settings } from "lucide-react";
 
 const prizeSchema = z.object({
   name: z.string().min(1, "Prize name is required").max(200, "Prize name too long"),
@@ -193,6 +194,36 @@ export function AdminDashboard() {
 
   const eligibleEntriesCount = entries.filter((entry: any) => entry.status === 'eligible').length;
 
+  const handleExportCSV = () => {
+    const authHeaders = {
+      'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+    };
+    
+    // Create a link and trigger download
+    const link = document.createElement('a');
+    link.href = '/api/admin/entries/export';
+    link.download = 'raffle-entries.csv';
+    
+    // Set authorization header by opening in new window with auth
+    fetch('/api/admin/entries/export', { headers: authHeaders })
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        toast({
+          title: "Error",
+          description: "Failed to export CSV",
+          variant: "destructive",
+        });
+      });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Admin Header */}
@@ -263,6 +294,14 @@ export function AdminDashboard() {
                   className="px-3 py-2"
                 />
                 <Button
+                  onClick={handleExportCSV}
+                  variant="outline"
+                  className="border-blueberry-500 text-blueberry-600 hover:bg-blueberry-50"
+                >
+                  <Download className="mr-2" size={16} />
+                  Export CSV
+                </Button>
+                <Button
                   onClick={() => drawWinnerMutation.mutate()}
                   disabled={drawWinnerMutation.isPending || eligibleEntriesCount === 0}
                   className="bg-gradient-to-r from-church-gold to-orange-500 hover:from-yellow-500 hover:to-orange-600"
@@ -274,7 +313,7 @@ export function AdminDashboard() {
                     </>
                   ) : (
                     <>
-                      <i className="fas fa-dice mr-2"></i>
+                      <Dices className="mr-2" size={16} />
                       Draw Winner
                     </>
                   )}

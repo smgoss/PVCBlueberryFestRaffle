@@ -81,6 +81,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/admin/entries/export", requireAdmin, async (req, res) => {
+    try {
+      const entries = await storage.getRaffleEntries();
+      const winnerEntryIds = await storage.getWinnerEntryIds();
+      
+      // Create CSV header
+      const csvHeader = "First Name,Last Name,Phone,Entry Time,Status\n";
+      
+      // Create CSV rows
+      const csvRows = entries.map(entry => {
+        const status = winnerEntryIds.includes(entry.id) ? 'Winner' : 'Eligible';
+        const entryTime = new Date(entry.entryTime).toLocaleString();
+        return `"${entry.firstName}","${entry.lastName}","${entry.phone}","${entryTime}","${status}"`;
+      }).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="raffle-entries.csv"');
+      
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting entries:", error);
+      res.status(500).json({ message: "Failed to export entries" });
+    }
+  });
+
   app.get("/api/admin/prizes", requireAdmin, async (req, res) => {
     try {
       const prizes = await storage.getPrizes();
