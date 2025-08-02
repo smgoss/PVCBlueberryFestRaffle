@@ -277,6 +277,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Winner delete routes
+  app.delete("/api/admin/winners/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteWinner(id);
+      res.json({ message: "Winner deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting winner:", error);
+      res.status(500).json({ message: "Failed to delete winner" });
+    }
+  });
+
+  app.delete("/api/admin/winners", requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteAllWinners();
+      res.json({ message: "All winners deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting all winners:", error);
+      res.status(500).json({ message: "Failed to delete all winners" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

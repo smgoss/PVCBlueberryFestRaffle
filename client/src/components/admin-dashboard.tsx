@@ -29,8 +29,8 @@ export function AdminDashboard() {
   const [selectedWinner, setSelectedWinner] = useState<RaffleEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const [showDeleteAllModal, setShowDeleteAllModal] = useState<'entries' | 'prizes' | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState<{ type: 'entry' | 'prize', id: string, name: string } | null>(null);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState<'entries' | 'prizes' | 'winners' | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<{ type: 'entry' | 'prize' | 'winner', id: string, name: string } | null>(null);
 
   const authHeaders = {
     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -335,6 +335,62 @@ export function AdminDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete all prizes",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteWinnerMutation = useMutation({
+    mutationFn: async (winnerId: string) => {
+      const response = await fetch(`/api/admin/winners/${winnerId}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error('Failed to delete winner');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/winners'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prizes'] });
+      toast({
+        title: "Success",
+        description: "Winner deleted successfully",
+        className: "bg-green-100 border-green-200 text-green-800",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete winner",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteAllWinnersMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/admin/winners', {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error('Failed to delete all winners');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/winners'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prizes'] });
+      setDeleteConfirmation('');
+      setShowDeleteAllModal(null);
+      toast({
+        title: "Success",
+        description: "All winners deleted successfully",
+        className: "bg-green-100 border-green-200 text-green-800",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete all winners",
         variant: "destructive",
       });
     },
@@ -652,9 +708,20 @@ export function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
               <h2 className="text-xl font-semibold text-gray-800">Winner Management</h2>
-              <div className="text-sm text-gray-600">
-                <i className="fas fa-info-circle mr-1"></i>
-                Manage prize claims and re-draws
+              <div className="flex items-center space-x-4">
+                <Button
+                  onClick={() => setShowDeleteAllModal('winners')}
+                  variant="outline"
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                  disabled={winners.length === 0}
+                >
+                  <Trash2 className="mr-2" size={16} />
+                  Delete All Winners
+                </Button>
+                <div className="text-sm text-gray-600">
+                  <i className="fas fa-info-circle mr-1"></i>
+                  Manage prize claims and re-draws
+                </div>
               </div>
             </div>
 
@@ -718,33 +785,47 @@ export function AdminDashboard() {
                             )}
                           </p>
                         </div>
-                        {!winner.claimedAt && !winner.isNoShow && (
-                          <div className="flex space-x-2">
-                            <Select
-                              onValueChange={(prizeId) => {
-                                claimPrizeMutation.mutate({ winnerId: winner.id, prizeId });
-                              }}
-                            >
-                              <SelectTrigger className="w-48">
-                                <SelectValue placeholder="Select claimed prize" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availablePrizes.map((prize: Prize) => (
-                                  <SelectItem key={prize.id} value={prize.id}>
-                                    {prize.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              onClick={() => noShowMutation.mutate(winner.id)}
-                              variant="destructive"
-                              size="sm"
-                            >
-                              No Show - Redraw
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex space-x-2">
+                          {!winner.claimedAt && !winner.isNoShow && (
+                            <>
+                              <Select
+                                onValueChange={(prizeId) => {
+                                  claimPrizeMutation.mutate({ winnerId: winner.id, prizeId });
+                                }}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Select claimed prize" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {availablePrizes.map((prize: Prize) => (
+                                    <SelectItem key={prize.id} value={prize.id}>
+                                      {prize.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                onClick={() => noShowMutation.mutate(winner.id)}
+                                variant="destructive"
+                                size="sm"
+                              >
+                                No Show - Redraw
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            onClick={() => setShowDeleteModal({ 
+                              type: 'winner', 
+                              id: winner.id, 
+                              name: `${winner.entry?.firstName} ${winner.entry?.lastName}` 
+                            })}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-500 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -807,7 +888,7 @@ export function AdminDashboard() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 m-4 w-full max-w-md">
             <div className="text-center">
               <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Delete All {showDeleteAllModal === 'entries' ? 'Entries' : 'Prizes'}?</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Delete All {showDeleteAllModal === 'entries' ? 'Entries' : showDeleteAllModal === 'prizes' ? 'Prizes' : 'Winners'}?</h2>
               <p className="text-gray-600 mb-6">
                 This action cannot be undone. Type <span className="font-bold text-red-600">DELETE ALL</span> to confirm.
               </p>
@@ -834,15 +915,17 @@ export function AdminDashboard() {
                   onClick={() => {
                     if (showDeleteAllModal === 'entries') {
                       deleteAllEntriesMutation.mutate();
-                    } else {
+                    } else if (showDeleteAllModal === 'prizes') {
                       deleteAllPrizesMutation.mutate();
+                    } else {
+                      deleteAllWinnersMutation.mutate();
                     }
                   }}
-                  disabled={deleteConfirmation !== 'DELETE ALL' || deleteAllEntriesMutation.isPending || deleteAllPrizesMutation.isPending}
+                  disabled={deleteConfirmation !== 'DELETE ALL' || deleteAllEntriesMutation.isPending || deleteAllPrizesMutation.isPending || deleteAllWinnersMutation.isPending}
                   variant="destructive"
                   className="flex-1"
                 >
-                  {(deleteAllEntriesMutation.isPending || deleteAllPrizesMutation.isPending) ? (
+                  {(deleteAllEntriesMutation.isPending || deleteAllPrizesMutation.isPending || deleteAllWinnersMutation.isPending) ? (
                     <>
                       <i className="fas fa-spinner fa-spin mr-2"></i>
                       Deleting...
@@ -863,7 +946,7 @@ export function AdminDashboard() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 m-4 w-full max-w-md">
             <div className="text-center">
               <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Delete {showDeleteModal.type === 'entry' ? 'Entry' : 'Prize'}?</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Delete {showDeleteModal.type === 'entry' ? 'Entry' : showDeleteModal.type === 'prize' ? 'Prize' : 'Winner'}?</h2>
               <p className="text-gray-600 mb-6">
                 Are you sure you want to delete <span className="font-bold">{showDeleteModal.name}</span>? This action cannot be undone.
               </p>
@@ -880,16 +963,18 @@ export function AdminDashboard() {
                   onClick={() => {
                     if (showDeleteModal.type === 'entry') {
                       deleteEntryMutation.mutate(showDeleteModal.id);
-                    } else {
+                    } else if (showDeleteModal.type === 'prize') {
                       deletePrizeMutation.mutate(showDeleteModal.id);
+                    } else {
+                      deleteWinnerMutation.mutate(showDeleteModal.id);
                     }
                     setShowDeleteModal(null);
                   }}
-                  disabled={deleteEntryMutation.isPending || deletePrizeMutation.isPending}
+                  disabled={deleteEntryMutation.isPending || deletePrizeMutation.isPending || deleteWinnerMutation.isPending}
                   variant="destructive"
                   className="flex-1"
                 >
-                  {(deleteEntryMutation.isPending || deletePrizeMutation.isPending) ? (
+                  {(deleteEntryMutation.isPending || deletePrizeMutation.isPending || deleteWinnerMutation.isPending) ? (
                     <>
                       <i className="fas fa-spinner fa-spin mr-2"></i>
                       Deleting...

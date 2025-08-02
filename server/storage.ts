@@ -36,6 +36,8 @@ export interface IStorage {
   createWinner(winner: InsertWinner): Promise<Winner>;
   updateWinner(id: string, updates: Partial<Winner>): Promise<Winner>;
   getWinnerEntryIds(): Promise<string[]>;
+  deleteWinner(winnerId: string): Promise<void>;
+  deleteAllWinners(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -191,6 +193,29 @@ export class DatabaseStorage implements IStorage {
       .set({ prizeId: null });
     // Then delete all prizes
     await db.delete(prizes);
+  }
+
+  async deleteWinner(winnerId: string): Promise<void> {
+    // If winner has a prize, mark it as available again
+    const [winner] = await db.select().from(winners).where(eq(winners.id, winnerId));
+    if (winner?.prizeId) {
+      await db
+        .update(prizes)
+        .set({ isAvailable: true })
+        .where(eq(prizes.id, winner.prizeId));
+    }
+    // Delete the winner record
+    await db.delete(winners).where(eq(winners.id, winnerId));
+  }
+
+  async deleteAllWinners(): Promise<void> {
+    // Mark all claimed prizes as available again
+    await db
+      .update(prizes)
+      .set({ isAvailable: true })
+      .where(eq(prizes.isAvailable, false));
+    // Delete all winners
+    await db.delete(winners);
   }
 }
 
