@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { AdminLogin } from "@/components/admin-login";
 import { Church, Settings, Gift, MapPin, Clock, Users } from "lucide-react";
+import blueberryBackground from "@assets/generated_images/Fresh_blueberries_background_e1109dfa.png";
 
 export default function Home() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -41,8 +42,17 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <div className="relative bg-cover bg-center h-48 rounded-2xl mb-6 shadow-xl bg-gradient-to-r from-blueberry-800/80 to-church-purple/60 flex items-center justify-center">
-            <div className="text-center text-white px-4">
+          <div 
+            className="relative bg-cover bg-center h-48 rounded-2xl mb-6 shadow-xl flex items-center justify-center"
+            style={{
+              backgroundImage: `url(${blueberryBackground})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            {/* Dark overlay for text readability */}
+            <div className="absolute inset-0 bg-black/40 rounded-2xl"></div>
+            <div className="relative text-center text-white px-4 z-10">
               <h1 className="text-3xl sm:text-4xl font-bold mb-2">
                 <Gift className="text-church-gold mr-2" size={24} />
                 Blueberry Festival Raffle
