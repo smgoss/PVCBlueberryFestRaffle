@@ -16,7 +16,8 @@ const raffleEntrySchema = z.object({
   lastName: z.string().min(1, "Last name is required").max(100, "Last name too long"),
   phone: z.string()
     .min(1, "Phone number is required")
-    .regex(/^\d{3}-\d{3}-\d{4}$/, "Phone must be in format 555-123-4567"),
+    .regex(/^\d{3}-\d{3}-\d{4}$/, "Phone must be exactly 10 digits in format 555-123-4567")
+    .refine((phone) => phone.replace(/\D/g, '').length === 10, "Phone number must be exactly 10 digits"),
 });
 
 type RaffleEntryForm = z.infer<typeof raffleEntrySchema>;
@@ -62,13 +63,16 @@ export function RaffleEntryForm() {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
     
+    // Limit to exactly 10 digits
+    const limitedDigits = digits.slice(0, 10);
+    
     // Format as XXX-XXX-XXXX
-    if (digits.length >= 6) {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-    } else if (digits.length >= 3) {
-      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (limitedDigits.length >= 6) {
+      return `${limitedDigits.slice(0, 3)}-${limitedDigits.slice(3, 6)}-${limitedDigits.slice(6, 10)}`;
+    } else if (limitedDigits.length >= 3) {
+      return `${limitedDigits.slice(0, 3)}-${limitedDigits.slice(3)}`;
     }
-    return digits;
+    return limitedDigits;
   };
 
   return (
@@ -146,7 +150,7 @@ export function RaffleEntryForm() {
                         className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blueberry-500 focus:border-transparent"
                       />
                     </FormControl>
-                    <p className="text-sm text-gray-500 mt-1">Format: 555-123-4567</p>
+                    <p className="text-sm text-gray-500 mt-1">Must be exactly 10 digits (Format: 555-123-4567)</p>
                     <FormMessage />
                   </FormItem>
                 )}

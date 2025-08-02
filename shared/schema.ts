@@ -53,6 +53,13 @@ export const insertRaffleEntrySchema = createInsertSchema(raffleEntries).pick({
   firstName: true,
   lastName: true,
   phone: true,
+}).extend({
+  firstName: z.string().min(1, "First name is required").max(100, "First name too long"),
+  lastName: z.string().min(1, "Last name is required").max(100, "Last name too long"),
+  phone: z.string()
+    .min(1, "Phone number is required")
+    .regex(/^\d{3}-\d{3}-\d{4}$/, "Phone must be exactly 10 digits in format 555-123-4567")
+    .refine((phone) => phone.replace(/\D/g, '').length === 10, "Phone number must be exactly 10 digits"),
 });
 
 export const insertPrizeSchema = createInsertSchema(prizes).pick({
