@@ -232,13 +232,19 @@ export function AdminDashboard() {
   // Delete mutations
   const deleteEntryMutation = useMutation({
     mutationFn: async (entryId: string) => {
-      await apiRequest("DELETE", `/api/admin/entries/${entryId}`, {}, authHeaders);
+      const response = await fetch(`/api/admin/entries/${entryId}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error('Failed to delete entry');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/entries'] });
       toast({
         title: "Success",
         description: "Entry deleted successfully",
+        className: "bg-green-100 border-green-200 text-green-800",
       });
     },
     onError: (error: Error) => {
@@ -252,7 +258,12 @@ export function AdminDashboard() {
 
   const deleteAllEntriesMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", "/api/admin/entries", { confirmation: deleteConfirmation }, authHeaders);
+      const response = await fetch('/api/admin/entries', {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error('Failed to delete all entries');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/entries'] });
@@ -262,6 +273,7 @@ export function AdminDashboard() {
       toast({
         title: "Success",
         description: "All entries deleted successfully",
+        className: "bg-green-100 border-green-200 text-green-800",
       });
     },
     onError: (error: Error) => {
@@ -275,13 +287,19 @@ export function AdminDashboard() {
 
   const deletePrizeMutation = useMutation({
     mutationFn: async (prizeId: string) => {
-      await apiRequest("DELETE", `/api/admin/prizes/${prizeId}`, {}, authHeaders);
+      const response = await fetch(`/api/admin/prizes/${prizeId}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error('Failed to delete prize');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/prizes'] });
       toast({
         title: "Success",
         description: "Prize deleted successfully",
+        className: "bg-green-100 border-green-200 text-green-800",
       });
     },
     onError: (error: Error) => {
@@ -295,7 +313,12 @@ export function AdminDashboard() {
 
   const deleteAllPrizesMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", "/api/admin/prizes", { confirmation: deleteConfirmation }, authHeaders);
+      const response = await fetch('/api/admin/prizes', {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error('Failed to delete all prizes');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/prizes'] });
@@ -305,6 +328,7 @@ export function AdminDashboard() {
       toast({
         title: "Success",
         description: "All prizes deleted successfully",
+        className: "bg-green-100 border-green-200 text-green-800",
       });
     },
     onError: (error: Error) => {
