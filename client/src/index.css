@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Custom theme colors */
+  --blueberry-50: hsl(239, 100%, 97%);
+  --blueberry-100: hsl(239, 80%, 94%);
+  --blueberry-500: hsl(232, 89%, 64%);
+  --blueberry-600: hsl(243, 61%, 59%);
+  --blueberry-700: hsl(243, 47%, 51%);
+  --blueberry-800: hsl(242, 50%, 42%);
+  --blueberry-900: hsl(242, 47%, 27%);
+  
+  --church-purple: hsl(266, 58%, 52%);
+  --church-green: hsl(160, 84%, 39%);
+  --church-gold: hsl(42, 96%, 49%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom utility classes for theme colors */
+.text-blueberry-50 { color: var(--blueberry-50); }
+.text-blueberry-100 { color: var(--blueberry-100); }
+.text-blueberry-500 { color: var(--blueberry-500); }
+.text-blueberry-600 { color: var(--blueberry-600); }
+.text-blueberry-700 { color: var(--blueberry-700); }
+.text-blueberry-800 { color: var(--blueberry-800); }
+.text-blueberry-900 { color: var(--blueberry-900); }
+
+.bg-blueberry-50 { background-color: var(--blueberry-50); }
+.bg-blueberry-100 { background-color: var(--blueberry-100); }
+.bg-blueberry-500 { background-color: var(--blueberry-500); }
+.bg-blueberry-600 { background-color: var(--blueberry-600); }
+.bg-blueberry-700 { background-color: var(--blueberry-700); }
+.bg-blueberry-800 { background-color: var(--blueberry-800); }
+.bg-blueberry-900 { background-color: var(--blueberry-900); }
+
+.border-blueberry-200 { border-color: hsl(239, 60%, 87%); }
+.border-blueberry-500 { border-color: var(--blueberry-500); }
+
+.hover\:bg-blueberry-600:hover { background-color: var(--blueberry-600); }
+.hover\:text-blueberry-500:hover { color: var(--blueberry-500); }
+
+.text-church-purple { color: var(--church-purple); }
+.text-church-green { color: var(--church-green); }
+.text-church-gold { color: var(--church-gold); }
+
+.bg-church-purple { background-color: var(--church-purple); }
+.bg-church-green { background-color: var(--church-green); }
+.bg-church-gold { background-color: var(--church-gold); }
+
+.from-blueberry-50 { --tw-gradient-from: var(--blueberry-50); }
+.from-blueberry-500 { --tw-gradient-from: var(--blueberry-500); }
+.from-blueberry-600 { --tw-gradient-from: var(--blueberry-600); }
+.from-blueberry-800 { --tw-gradient-from: var(--blueberry-800); }
+
+.to-blueberry-100 { --tw-gradient-to: var(--blueberry-100); }
+.to-blueberry-600 { --tw-gradient-to: var(--blueberry-600); }
+
+.to-church-purple { --tw-gradient-to: var(--church-purple); }
+.from-church-gold { --tw-gradient-from: var(--church-gold); }
+.to-orange-500 { --tw-gradient-to: hsl(25, 95%, 53%); }
+
+.from-yellow-500 { --tw-gradient-from: hsl(45, 93%, 47%); }
+.to-orange-600 { --tw-gradient-to: hsl(21, 90%, 48%); }
+
+/* Gradient backgrounds for cards */
+.from-blueberry-50.to-purple-50 {
+  background: linear-gradient(to bottom right, var(--blueberry-50), hsl(280, 100%, 97%));
+}
+
+.from-green-50.to-emerald-50 {
+  background: linear-gradient(to right, hsl(138, 76%, 97%), hsl(152, 76%, 96%));
+}
+
+.from-orange-50.to-yellow-50 {
+  background: linear-gradient(to right, hsl(33, 100%, 96%), hsl(55, 92%, 95%));
+}
+
+.from-red-50.to-pink-50 {
+  background: linear-gradient(to right, hsl(0, 86%, 97%), hsl(327, 73%, 97%));
+}
