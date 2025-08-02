@@ -462,18 +462,33 @@ export function AdminDashboard() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <Button
-                            onClick={() => setShowDeleteModal({ 
-                              type: 'entry', 
-                              id: entry.id, 
-                              name: `${entry.firstName} ${entry.lastName}` 
-                            })}
-                            variant="outline"
-                            size="sm"
-                            className="border-red-500 text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 size={14} />
-                          </Button>
+                          <div className="flex space-x-2">
+                            {entry.status === 'eligible' && (
+                              <Button
+                                onClick={() => {
+                                  setSelectedWinner(entry);
+                                  setShowWinnerModal(true);
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="border-green-500 text-green-600 hover:bg-green-50"
+                              >
+                                <Trophy size={14} />
+                              </Button>
+                            )}
+                            <Button
+                              onClick={() => setShowDeleteModal({ 
+                                type: 'entry', 
+                                id: entry.id, 
+                                name: `${entry.firstName} ${entry.lastName}` 
+                              })}
+                              variant="outline"
+                              size="sm"
+                              className="border-red-500 text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
