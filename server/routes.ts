@@ -109,6 +109,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/admin/entries/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteRaffleEntry(id);
+      res.json({ message: "Entry deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+      res.status(500).json({ message: "Failed to delete entry" });
+    }
+  });
+
+  app.delete("/api/admin/entries", requireAdmin, async (req, res) => {
+    try {
+      const { confirmation } = req.body;
+      if (confirmation !== "DELETE ALL") {
+        return res.status(400).json({ message: "Invalid confirmation. Type 'DELETE ALL' to confirm." });
+      }
+      await storage.deleteAllRaffleEntries();
+      res.json({ message: "All entries deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting all entries:", error);
+      res.status(500).json({ message: "Failed to delete all entries" });
+    }
+  });
+
   app.get("/api/admin/prizes", requireAdmin, async (req, res) => {
     try {
       const prizes = await storage.getPrizes();
@@ -224,6 +249,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error marking no-show:", error);
       res.status(500).json({ message: "Failed to mark as no-show" });
+    }
+  });
+
+  app.delete("/api/admin/prizes/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePrize(id);
+      res.json({ message: "Prize deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting prize:", error);
+      res.status(500).json({ message: "Failed to delete prize" });
+    }
+  });
+
+  app.delete("/api/admin/prizes", requireAdmin, async (req, res) => {
+    try {
+      const { confirmation } = req.body;
+      if (confirmation !== "DELETE ALL") {
+        return res.status(400).json({ message: "Invalid confirmation. Type 'DELETE ALL' to confirm." });
+      }
+      await storage.deleteAllPrizes();
+      res.json({ message: "All prizes deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting all prizes:", error);
+      res.status(500).json({ message: "Failed to delete all prizes" });
     }
   });
 

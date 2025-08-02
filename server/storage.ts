@@ -20,12 +20,16 @@ export interface IStorage {
   checkDuplicateEntry(firstName: string, lastName: string): Promise<RaffleEntry | undefined>;
   getEligibleEntries(): Promise<RaffleEntry[]>;
   markEntryAsWinner(entryId: string): Promise<void>;
+  deleteRaffleEntry(entryId: string): Promise<void>;
+  deleteAllRaffleEntries(): Promise<void>;
 
   // Prizes
   getPrizes(): Promise<Prize[]>;
   createPrize(prize: InsertPrize): Promise<Prize>;
   updatePrize(id: string, prize: Partial<Prize>): Promise<Prize>;
   markPrizeAsClaimed(prizeId: string): Promise<void>;
+  deletePrize(prizeId: string): Promise<void>;
+  deleteAllPrizes(): Promise<void>;
 
   // Winners
   getWinners(): Promise<WinnerWithDetails[]>;
@@ -153,6 +157,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(winners.isNoShow, false));
     
     return winnerEntries.map(w => w.entryId);
+  }
+
+  // Delete methods
+  async deleteRaffleEntry(entryId: string): Promise<void> {
+    // First delete any associated winners
+    await db.delete(winners).where(eq(winners.entryId, entryId));
+    // Then delete the entry
+    await db.delete(raffleEntries).where(eq(raffleEntries.id, entryId));
+  }
+
+  async deleteAllRaffleEntries(): Promise<void> {
+    // First delete all winners
+    await db.delete(winners);
+    // Then delete all entries
+    await db.delete(raffleEntries);
+  }
+
+  async deletePrize(prizeId: string): Promise<void> {
+    // Update any winners that have this prize to remove the prize assignment
+    await db
+      .update(winners)
+      .set({ prizeId: null })
+      .where(eq(winners.prizeId, prizeId));
+    // Then delete the prize
+    await db.delete(prizes).where(eq(prizes.id, prizeId));
+  }
+
+  async deleteAllPrizes(): Promise<void> {
+    // Update all winners to remove prize assignments
+    await db
+      .update(winners)
+      .set({ prizeId: null });
+    // Then delete all prizes
+    await db.delete(prizes);
   }
 }
 

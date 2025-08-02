@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { RaffleEntry, Prize, WinnerWithDetails } from "@shared/schema";
-import { Download, Users, Gift, Trophy, Dices, Plus, Search, Settings } from "lucide-react";
+import { Download, Users, Gift, Trophy, Dices, Plus, Search, Settings, Trash2, AlertTriangle } from "lucide-react";
 
 const prizeSchema = z.object({
   name: z.string().min(1, "Prize name is required").max(200, "Prize name too long"),
@@ -28,6 +28,9 @@ export function AdminDashboard() {
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [selectedWinner, setSelectedWinner] = useState<RaffleEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState<'entries' | 'prizes' | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<{ type: 'entry' | 'prize', id: string, name: string } | null>(null);
 
   const authHeaders = {
     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -224,6 +227,93 @@ export function AdminDashboard() {
       });
   };
 
+  // Delete mutations
+  const deleteEntryMutation = useMutation({
+    mutationFn: async (entryId: string) => {
+      await apiRequest("DELETE", `/api/admin/entries/${entryId}`, {}, authHeaders);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/entries'] });
+      toast({
+        title: "Success",
+        description: "Entry deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete entry",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteAllEntriesMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/admin/entries", { confirmation: deleteConfirmation }, authHeaders);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/entries'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/winners'] });
+      setDeleteConfirmation('');
+      setShowDeleteAllModal(null);
+      toast({
+        title: "Success",
+        description: "All entries deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete all entries",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deletePrizeMutation = useMutation({
+    mutationFn: async (prizeId: string) => {
+      await apiRequest("DELETE", `/api/admin/prizes/${prizeId}`, {}, authHeaders);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prizes'] });
+      toast({
+        title: "Success",
+        description: "Prize deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete prize",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteAllPrizesMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/admin/prizes", { confirmation: deleteConfirmation }, authHeaders);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prizes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/winners'] });
+      setDeleteConfirmation('');
+      setShowDeleteAllModal(null);
+      toast({
+        title: "Success",
+        description: "All prizes deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete all prizes",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Admin Header */}
@@ -302,6 +392,15 @@ export function AdminDashboard() {
                   Export CSV
                 </Button>
                 <Button
+                  onClick={() => setShowDeleteAllModal('entries')}
+                  variant="outline"
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                  disabled={entries.length === 0}
+                >
+                  <Trash2 className="mr-2" size={16} />
+                  Delete All
+                </Button>
+                <Button
                   onClick={() => drawWinnerMutation.mutate()}
                   disabled={drawWinnerMutation.isPending || eligibleEntriesCount === 0}
                   className="bg-gradient-to-r from-church-gold to-orange-500 hover:from-yellow-500 hover:to-orange-600"
@@ -336,6 +435,7 @@ export function AdminDashboard() {
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Phone</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Entry Time</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -359,6 +459,20 @@ export function AdminDashboard() {
                             {entry.status === 'eligible' ? 'Eligible' : 'Already Won'}
                           </span>
                         </td>
+                        <td className="px-4 py-3">
+                          <Button
+                            onClick={() => setShowDeleteModal({ 
+                              type: 'entry', 
+                              id: entry.id, 
+                              name: `${entry.firstName} ${entry.lastName}` 
+                            })}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-500 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -373,13 +487,24 @@ export function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
               <h2 className="text-xl font-semibold text-gray-800">Prize Management</h2>
-              <Button
-                onClick={() => setShowAddPrize(true)}
-                className="bg-blueberry-500 hover:bg-blueberry-600"
-              >
-                <i className="fas fa-plus mr-2"></i>
-                Add Prize
-              </Button>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => setShowDeleteAllModal('prizes')}
+                  variant="outline"
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                  disabled={prizes.length === 0}
+                >
+                  <Trash2 className="mr-2" size={16} />
+                  Delete All
+                </Button>
+                <Button
+                  onClick={() => setShowAddPrize(true)}
+                  className="bg-blueberry-500 hover:bg-blueberry-600"
+                >
+                  <Plus className="mr-2" size={16} />
+                  Add Prize
+                </Button>
+              </div>
             </div>
 
             {showAddPrize && (
@@ -449,7 +574,7 @@ export function AdminDashboard() {
                           <h4 className="font-semibold text-gray-800">{prize.name}</h4>
                           <p className="text-sm text-gray-600">{prize.description}</p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col space-y-2">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                               prize.isAvailable
@@ -459,6 +584,18 @@ export function AdminDashboard() {
                           >
                             {prize.isAvailable ? 'Available' : 'Claimed'}
                           </span>
+                          <Button
+                            onClick={() => setShowDeleteModal({ 
+                              type: 'prize', 
+                              id: prize.id, 
+                              name: prize.name 
+                            })}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-500 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -618,6 +755,109 @@ export function AdminDashboard() {
                   "Confirm Winner"
                 )}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Confirmation Modal */}
+      {showDeleteAllModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 m-4 w-full max-w-md">
+            <div className="text-center">
+              <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Delete All {showDeleteAllModal === 'entries' ? 'Entries' : 'Prizes'}?</h2>
+              <p className="text-gray-600 mb-6">
+                This action cannot be undone. Type <span className="font-bold text-red-600">DELETE ALL</span> to confirm.
+              </p>
+              
+              <Input
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="Type DELETE ALL to confirm"
+                className="mb-6"
+              />
+
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeleteAllModal(null);
+                    setDeleteConfirmation('');
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (showDeleteAllModal === 'entries') {
+                      deleteAllEntriesMutation.mutate();
+                    } else {
+                      deleteAllPrizesMutation.mutate();
+                    }
+                  }}
+                  disabled={deleteConfirmation !== 'DELETE ALL' || deleteAllEntriesMutation.isPending || deleteAllPrizesMutation.isPending}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  {(deleteAllEntriesMutation.isPending || deleteAllPrizesMutation.isPending) ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete All'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Individual Item Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 m-4 w-full max-w-md">
+            <div className="text-center">
+              <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Delete {showDeleteModal.type === 'entry' ? 'Entry' : 'Prize'}?</h2>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete <span className="font-bold">{showDeleteModal.name}</span>? This action cannot be undone.
+              </p>
+
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteModal(null)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (showDeleteModal.type === 'entry') {
+                      deleteEntryMutation.mutate(showDeleteModal.id);
+                    } else {
+                      deletePrizeMutation.mutate(showDeleteModal.id);
+                    }
+                    setShowDeleteModal(null);
+                  }}
+                  disabled={deleteEntryMutation.isPending || deletePrizeMutation.isPending}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  {(deleteEntryMutation.isPending || deletePrizeMutation.isPending) ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
