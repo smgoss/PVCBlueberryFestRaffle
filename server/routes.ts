@@ -353,61 +353,26 @@ God bless!`;
         body: JSON.stringify(smsBody),
       });
       
-      // For email, we'll just consider it successful for now since Clearstream is primarily SMS-focused
-      // and the email functionality requires more complex setup with subscriber management
-      const emailResponse = { ok: true, status: 200 };
-      
-      let smsSuccess = false;
-      let emailSuccess = false;
-      let errors = [];
-
       // Check SMS response
       if (smsResponse.ok) {
-        smsSuccess = true;
         console.log('SMS notification sent successfully');
-      } else {
-        const smsError = await smsResponse.text();
-        console.error('SMS notification failed:', smsResponse.status, smsError);
-        errors.push(`SMS failed (${smsResponse.status}): ${smsError}`);
-      }
-
-      // Check Email response
-      if (emailResponse.ok) {
-        emailSuccess = true;
-        console.log('Email notification sent successfully');
-      } else {
-        const emailError = await emailResponse.text();
-        console.error('Email notification failed:', emailResponse.status, emailError);
-        errors.push(`Email failed (${emailResponse.status}): ${emailError}`);
-      }
-
-      // If at least one notification succeeded, mark as notified
-      if (smsSuccess || emailSuccess) {
+        
         // Mark winner as notified
         await storage.markWinnerAsNotified(winnerId);
         
-        let successMessage = "Winner notified successfully";
-        if (smsSuccess && emailSuccess) {
-          successMessage += " via SMS and email";
-        } else if (smsSuccess) {
-          successMessage += " via SMS only";
-        } else {
-          successMessage += " via email only";
-        }
-        
         res.json({ 
-          message: successMessage,
+          message: "Winner notified successfully via SMS",
           notifications: {
-            sms: smsSuccess ? "sent" : "failed",
-            email: emailSuccess ? "sent" : "failed"
-          },
-          errors: errors.length > 0 ? errors : undefined
+            sms: "sent"
+          }
         });
       } else {
-        // Both notifications failed
+        const smsError = await smsResponse.text();
+        console.error('SMS notification failed:', smsResponse.status, smsError);
+        
         return res.status(500).json({ 
-          message: "All notification methods failed",
-          errors: errors
+          message: "SMS notification failed",
+          error: `SMS failed (${smsResponse.status}): ${smsError}`
         });
       }
     } catch (error) {
