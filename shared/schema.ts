@@ -29,6 +29,7 @@ export const winners = pgTable("winners", {
   drawnAt: timestamp("drawn_at").defaultNow().notNull(),
   claimedAt: timestamp("claimed_at"),
   isNoShow: boolean("is_no_show").default(false).notNull(),
+  notifiedAt: timestamp("notified_at"),
 });
 
 export const winnersRelations = relations(winners, ({ one }) => ({

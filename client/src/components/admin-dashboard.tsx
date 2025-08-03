@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { RaffleEntry, Prize, WinnerWithDetails } from "@shared/schema";
-import { Download, Users, Gift, Trophy, Dices, Plus, Search, Settings, Trash2, AlertTriangle } from "lucide-react";
+import { Download, Users, Gift, Trophy, Dices, Plus, Search, Settings, Trash2, AlertTriangle, Bell } from "lucide-react";
 
 const prizeSchema = z.object({
   name: z.string().min(1, "Prize name is required").max(200, "Prize name too long"),
@@ -172,6 +172,35 @@ export function AdminDashboard() {
         title: "Success",
         description: "Winner marked as no-show. You can now draw a new winner.",
         className: "bg-green-100 border-green-200 text-green-800",
+      });
+    },
+  });
+
+  const notifyWinnerMutation = useMutation({
+    mutationFn: async (winnerId: string) => {
+      const response = await fetch(`/api/admin/notify-winner/${winnerId}`, {
+        method: 'POST',
+        headers: authHeaders,
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to notify winner');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/winners'] });
+      toast({
+        title: "Notification Sent!",
+        description: "Winner has been notified via SMS and email through Clearstream.",
+        className: "bg-green-100 border-green-200 text-green-800",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Notification Failed",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -786,9 +815,12 @@ export function AdminDashboard() {
                             {winner.claimedAt && (
                               <> | Claimed: {new Date(winner.claimedAt).toLocaleString()}</>
                             )}
+                            {winner.notifiedAt && (
+                              <> | Notified: {new Date(winner.notifiedAt).toLocaleString()}</>
+                            )}
                           </p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-2">
                           {!winner.claimedAt && !winner.isNoShow && (
                             <>
                               <Select
@@ -815,6 +847,23 @@ export function AdminDashboard() {
                                 No Show - Redraw
                               </Button>
                             </>
+                          )}
+                          {!winner.isNoShow && (
+                            <Button
+                              onClick={() => notifyWinnerMutation.mutate(winner.id)}
+                              disabled={notifyWinnerMutation.isPending}
+                              variant="outline"
+                              size="sm"
+                              className={`${
+                                winner.notifiedAt 
+                                  ? 'border-green-500 text-green-600 hover:bg-green-50' 
+                                  : 'border-blue-500 text-blue-600 hover:bg-blue-50'
+                              }`}
+                              title={winner.notifiedAt ? 'Winner has been notified' : 'Send SMS & Email notification'}
+                            >
+                              <Bell size={14} className="mr-1" />
+                              {winner.notifiedAt ? 'Notified' : 'Notify Winner'}
+                            </Button>
                           )}
                           <Button
                             onClick={() => setShowDeleteModal({ 

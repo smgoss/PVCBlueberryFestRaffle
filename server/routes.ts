@@ -299,6 +299,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clearstream notification endpoint
+  app.post("/api/admin/notify-winner/:winnerId", requireAdmin, async (req, res) => {
+    try {
+      const { winnerId } = req.params;
+      
+      // Get winner details with entry information
+      const winners = await storage.getWinners();
+      const winner = winners.find(w => w.id === winnerId);
+      
+      if (!winner || !winner.entry) {
+        return res.status(404).json({ message: "Winner not found" });
+      }
+      
+      const entry = winner.entry;
+      const prize = winner.prize;
+      
+      // Prepare notification messages
+      const prizeText = prize ? `for the ${prize.name}` : '';
+      const subject = `🎉 Congratulations! You've Won ${prizeText}`;
+      const message = `Congratulations ${entry.firstName}! You've been selected as a winner ${prizeText} in the Pathway Vineyard Church GNG Campus Blueberry Festival Raffle! Please contact us to claim your prize. God bless!`;
+      
+      // Send SMS notification via Clearstream
+      const smsResponse = await fetch('https://api.clearstream.io/v1/text_messages', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLEARSTREAM_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: entry.phone.replace(/\D/g, ''), // Remove formatting, send just digits
+          message: message,
+        }),
+      });
+      
+      // Send email notification via Clearstream
+      const emailResponse = await fetch('https://api.clearstream.io/v1/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLEARSTREAM_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: entry.email,
+          subject: subject,
+          html_body: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #4F46E5;">${subject}</h2>
+              <p>Dear ${entry.firstName} ${entry.lastName},</p>
+              <p>We are thrilled to inform you that you have been selected as a winner ${prizeText} in our Blueberry Festival Raffle!</p>
+              ${prize ? `<div style="background: #F3F4F6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin: 0; color: #374151;">Your Prize:</h3>
+                <p style="margin: 5px 0; font-weight: bold;">${prize.name}</p>
+                ${prize.description ? `<p style="margin: 5px 0; color: #6B7280;">${prize.description}</p>` : ''}
+              </div>` : ''}
+              <p>Please contact us at your earliest convenience to arrange for prize pickup.</p>
+              <p>Thank you for participating in our Blueberry Festival Raffle!</p>
+              <p>Blessings,<br>
+              <strong>Pathway Vineyard Church GNG Campus</strong><br>
+              667 Morse Rd, New Gloucester, ME 04260</p>
+            </div>
+          `,
+        }),
+      });
+      
+      // Check if both notifications were successful
+      if (!smsResponse.ok || !emailResponse.ok) {
+        const smsError = !smsResponse.ok ? await smsResponse.text() : null;
+        const emailError = !emailResponse.ok ? await emailResponse.text() : null;
+        
+        return res.status(500).json({ 
+          message: "Failed to send notifications",
+          errors: {
+            sms: smsError,
+            email: emailError
+          }
+        });
+      }
+      
+      // Mark winner as notified
+      await storage.markWinnerAsNotified(winnerId);
+      
+      res.json({ 
+        message: "Winner notified successfully",
+        notifications: {
+          sms: "sent",
+          email: "sent"
+        }
+      });
+    } catch (error) {
+      console.error("Error notifying winner:", error);
+      res.status(500).json({ message: "Failed to notify winner" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

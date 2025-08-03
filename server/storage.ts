@@ -38,6 +38,7 @@ export interface IStorage {
   getWinnerEntryIds(): Promise<string[]>;
   deleteWinner(winnerId: string): Promise<void>;
   deleteAllWinners(): Promise<void>;
+  markWinnerAsNotified(winnerId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -217,6 +218,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(prizes.isAvailable, false));
     // Delete all winners
     await db.delete(winners);
+  }
+
+  async markWinnerAsNotified(winnerId: string): Promise<void> {
+    await db
+      .update(winners)
+      .set({ notifiedAt: new Date() })
+      .where(eq(winners.id, winnerId));
   }
 }
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application for managing a church raffle system, specifically for Pathway Vineyard Church GNG Campus's Blueberry Festival. The application allows visitors to enter raffle drawings and provides administrative capabilities for managing entries, prizes, and winners. Built as a modern React frontend with an Express.js backend, it features a clean, church-themed UI with comprehensive raffle management functionality.
+This is a full-stack web application for managing a church raffle system, specifically for Pathway Vineyard Church GNG Campus's Blueberry Festival. The application allows visitors to enter raffle drawings and provides administrative capabilities for managing entries, prizes, and winners. Built as a modern React frontend with an Express.js backend, it features a clean, church-themed UI with comprehensive raffle management functionality and integrated Clearstream.io notifications for winner communications.
 
 ## User Preferences
 
@@ -43,6 +43,13 @@ Preferred communication style: Simple, everyday language.
 - **Token Storage**: Client-side storage in localStorage
 - **Route Protection**: Conditional routing based on authentication status
 - **API Security**: Bearer token validation on admin endpoints
+
+### Winner Notification System
+- **Clearstream.io Integration**: Automated SMS and email notifications to winners
+- **Dual Channel Communication**: Sends both text messages and emails simultaneously
+- **Notification Tracking**: Database tracking of when winners are notified
+- **Professional Templates**: Church-branded messages with prize details and contact information
+- **Error Handling**: Comprehensive error handling and user feedback for notification failures
 
 ### UI/UX Design Patterns
 - **Design System**: Consistent component library with church branding
