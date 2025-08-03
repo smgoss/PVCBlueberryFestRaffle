@@ -128,6 +128,7 @@ export class DatabaseStorage implements IStorage {
         drawnAt: winners.drawnAt,
         claimedAt: winners.claimedAt,
         isNoShow: winners.isNoShow,
+        notifiedAt: winners.notifiedAt,
         entry: raffleEntries,
         prize: prizes,
       })

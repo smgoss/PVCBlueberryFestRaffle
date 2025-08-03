@@ -344,10 +344,18 @@ God bless!`;
       
       console.log(`SMS request body:`, JSON.stringify(smsBody, null, 2));
       
+      const apiKey = process.env.CLEARSTREAM_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          message: "Clearstream API key not configured",
+          error: "Missing CLEARSTREAM_API_KEY environment variable"
+        });
+      }
+
       const smsResponse = await fetch('https://api.getclearstream.com/v1/texts', {
         method: 'POST',
         headers: {
-          'X-Api-Key': process.env.CLEARSTREAM_API_KEY,
+          'X-Api-Key': apiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(smsBody),
