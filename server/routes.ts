@@ -315,10 +315,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const entry = winner.entry;
       const prize = winner.prize;
       
-      // Prepare notification messages
-      const prizeText = prize ? `for the ${prize.name}` : '';
-      const subject = `Pathway Vineyard Church GNG Raffle`;
-      const message = `Congratulations ${entry.firstName}! You've been selected as a winner! Visit the Pathway Vineyard Church table by the bouncy house to claim your prize.`;
+      // Prepare notification messages (include subject in message body)
+      const prizeText = prize ? ` for the ${prize.name}` : '';
+      const subject = `Pathway Vineyard Raffle Winner!`;
+      const message = `${subject}
+
+Congratulations ${entry.firstName}! You've been selected as a winner${prizeText} in our Blueberry Festival Raffle!
+
+Please visit the Pathway Vineyard Church table by the bouncy house to claim your prize.
+
+God bless!`;
       
       console.log(`Attempting to notify winner: ${entry.firstName} ${entry.lastName} (${entry.phone}, ${entry.email})`);
       console.log(`Clearstream API Key available: ${!!process.env.CLEARSTREAM_API_KEY}`);
@@ -330,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Formatted phone for SMS: ${formattedPhone}`);
       console.log(`Message to send: ${message}`);
       
-      // Send SMS notification via Clearstream (remove text_header to avoid emoji issues)
+      // Send SMS notification via Clearstream (no header field to avoid restrictions)
       const smsBody = {
         to: formattedPhone,
         text_body: message,
