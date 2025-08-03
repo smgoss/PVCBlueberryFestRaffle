@@ -293,7 +293,8 @@ export function AdminDashboard() {
     mutationFn: async () => {
       const response = await fetch('/api/admin/entries', {
         method: 'DELETE',
-        headers: authHeaders,
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: deleteConfirmation }),
       });
       if (!response.ok) throw new Error('Failed to delete all entries');
       return response.json();
@@ -348,7 +349,8 @@ export function AdminDashboard() {
     mutationFn: async () => {
       const response = await fetch('/api/admin/prizes', {
         method: 'DELETE',
-        headers: authHeaders,
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: deleteConfirmation }),
       });
       if (!response.ok) throw new Error('Failed to delete all prizes');
       return response.json();
@@ -404,7 +406,8 @@ export function AdminDashboard() {
     mutationFn: async () => {
       const response = await fetch('/api/admin/winners', {
         method: 'DELETE',
-        headers: authHeaders,
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: deleteConfirmation }),
       });
       if (!response.ok) throw new Error('Failed to delete all winners');
       return response.json();

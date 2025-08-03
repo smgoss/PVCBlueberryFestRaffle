@@ -291,6 +291,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/admin/winners", requireAdmin, async (req, res) => {
     try {
+      const { confirmation } = req.body;
+      if (confirmation !== "DELETE ALL") {
+        return res.status(400).json({ message: "Invalid confirmation. Type 'DELETE ALL' to confirm." });
+      }
       await storage.deleteAllWinners();
       res.json({ message: "All winners deleted successfully" });
     } catch (error) {
