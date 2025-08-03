@@ -28,10 +28,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const entryData = insertRaffleEntrySchema.parse(req.body);
       
       // Check for duplicate entry (name and email combination)
-      const existing = await storage.checkDuplicateEntry(entryData.firstName, entryData.lastName, entryData.email);
-      if (existing) {
+      const existingNameEmail = await storage.checkDuplicateEntry(entryData.firstName, entryData.lastName, entryData.email);
+      if (existingNameEmail) {
         return res.status(400).json({ 
           message: "An entry with this name and email combination already exists." 
+        });
+      }
+
+      // Check for duplicate phone number
+      const existingPhone = await storage.checkDuplicatePhone(entryData.phone);
+      if (existingPhone) {
+        return res.status(400).json({ 
+          message: "An entry with this phone number already exists. Each person can only enter once." 
         });
       }
       

@@ -18,6 +18,7 @@ export interface IStorage {
   getRaffleEntries(): Promise<RaffleEntry[]>;
   createRaffleEntry(entry: InsertRaffleEntry): Promise<RaffleEntry>;
   checkDuplicateEntry(firstName: string, lastName: string, email: string): Promise<RaffleEntry | undefined>;
+  checkDuplicatePhone(phone: string): Promise<RaffleEntry | undefined>;
   getEligibleEntries(): Promise<RaffleEntry[]>;
   markEntryAsWinner(entryId: string): Promise<void>;
   deleteRaffleEntry(entryId: string): Promise<void>;
@@ -66,6 +67,14 @@ export class DatabaseStorage implements IStorage {
           eq(raffleEntries.email, email)
         )
       );
+    return existing;
+  }
+
+  async checkDuplicatePhone(phone: string): Promise<RaffleEntry | undefined> {
+    const [existing] = await db
+      .select()
+      .from(raffleEntries)
+      .where(eq(raffleEntries.phone, phone));
     return existing;
   }
 
