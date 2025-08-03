@@ -36,7 +36,7 @@ export function AdminDashboard() {
     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
   };
 
-  // Queries
+  // Queries with optimized caching and prefetching
   const { data: entries = [], isLoading: entriesLoading } = useQuery({
     queryKey: ['/api/admin/entries'],
     queryFn: async () => {
@@ -44,6 +44,7 @@ export function AdminDashboard() {
       if (!response.ok) throw new Error('Failed to fetch entries');
       return response.json();
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes for frequently updated data
   });
 
   const { data: prizes = [], isLoading: prizesLoading } = useQuery({
@@ -53,6 +54,7 @@ export function AdminDashboard() {
       if (!response.ok) throw new Error('Failed to fetch prizes');
       return response.json();
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes for less frequently updated data
   });
 
   const { data: winners = [], isLoading: winnersLoading } = useQuery({
@@ -62,6 +64,7 @@ export function AdminDashboard() {
       if (!response.ok) throw new Error('Failed to fetch winners');
       return response.json();
     },
+    staleTime: 1 * 60 * 1000, // 1 minute for winners data
   });
 
   // Mutations
@@ -533,7 +536,19 @@ export function AdminDashboard() {
             </div>
 
             {entriesLoading ? (
-              <div className="text-center py-8">Loading entries...</div>
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="bg-gray-100 animate-pulse rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                      <div className="w-20 h-8 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : filteredEntries.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 {searchTerm ? 'No entries match your search.' : 'No entries found.'}
@@ -758,7 +773,22 @@ export function AdminDashboard() {
             </div>
 
             {winnersLoading ? (
-              <div className="text-center py-8">Loading winners...</div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-gray-100 animate-pulse rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <div className="w-16 h-8 bg-gray-200 rounded"></div>
+                        <div className="w-20 h-8 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : winners.length === 0 ? (
               <div className="text-center py-8 text-gray-500">No winners drawn yet.</div>
             ) : (

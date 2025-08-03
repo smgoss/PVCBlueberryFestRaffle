@@ -47,6 +47,8 @@ export function RaffleEntryForm() {
       setIsSubmitted(true);
       setShowSuccessModal(true);
       form.reset();
+      // Pre-warm cache for admin if they need to check entries
+      // queryClient.prefetchQuery({ queryKey: ['/api/admin/entries'] });
     },
     onError: (error: Error) => {
       toast({

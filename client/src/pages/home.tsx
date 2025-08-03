@@ -1,10 +1,12 @@
 import { RaffleEntryForm } from "@/components/raffle-entry-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
-import { AdminLogin } from "@/components/admin-login";
-import { Church, Settings, Gift, MapPin, Clock, Users } from "lucide-react";
+import { useState, lazy, Suspense } from "react";
+import { Church, Settings, MapPin, Clock, Users } from "lucide-react";
 import blueberryBackground from "@assets/generated_images/Fresh_blueberries_background_e1109dfa.png";
+
+// Lazy load admin login component
+const AdminLogin = lazy(() => import("@/components/admin-login").then(module => ({ default: module.AdminLogin })));
 
 export default function Home() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -99,7 +101,11 @@ export default function Home() {
 
       {/* Admin Login Modal */}
       {showAdminLogin && (
-        <AdminLogin onClose={() => setShowAdminLogin(false)} />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6">Loading...</div>
+        </div>}>
+          <AdminLogin onClose={() => setShowAdminLogin(false)} />
+        </Suspense>
       )}
     </div>
   );
