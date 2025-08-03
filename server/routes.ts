@@ -317,7 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Prepare notification messages
       const prizeText = prize ? `for the ${prize.name}` : '';
-      const subject = `🎉 Pathway Vineyard Church GNG Raffle`;
+      const subject = `Pathway Vineyard Church GNG Raffle`;
       const message = `Congratulations ${entry.firstName}! You've been selected as a winner! Visit the Pathway Vineyard Church table by the bouncy house to claim your prize.`;
       
       console.log(`Attempting to notify winner: ${entry.firstName} ${entry.lastName} (${entry.phone}, ${entry.email})`);
