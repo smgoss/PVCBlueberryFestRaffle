@@ -8,6 +8,7 @@ export const raffleEntries = pgTable("raffle_entries", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   firstName: varchar("first_name", { length: 100 }).notNull(),
   lastName: varchar("last_name", { length: 100 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   entryTime: timestamp("entry_time").defaultNow().notNull(),
   hasWon: boolean("has_won").default(false).notNull(),
@@ -52,10 +53,12 @@ export const prizesRelations = relations(prizes, ({ many }) => ({
 export const insertRaffleEntrySchema = createInsertSchema(raffleEntries).pick({
   firstName: true,
   lastName: true,
+  email: true,
   phone: true,
 }).extend({
   firstName: z.string().min(1, "First name is required").max(100, "First name too long"),
   lastName: z.string().min(1, "Last name is required").max(100, "Last name too long"),
+  email: z.string().email("Please enter a valid email address").max(255, "Email too long"),
   phone: z.string()
     .min(1, "Phone number is required")
     .regex(/^\d{3}-\d{3}-\d{4}$/, "Phone must be exactly 10 digits in format 555-123-4567")
@@ -80,6 +83,6 @@ export type InsertWinner = z.infer<typeof insertWinnerSchema>;
 export type Winner = typeof winners.$inferSelect;
 
 export type WinnerWithDetails = Winner & {
-  entry: RaffleEntry;
+  entry: RaffleEntry | null;
   prize: Prize | null;
 };

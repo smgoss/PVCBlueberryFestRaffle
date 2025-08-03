@@ -27,11 +27,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const entryData = insertRaffleEntrySchema.parse(req.body);
       
-      // Check for duplicate name combination
-      const existing = await storage.checkDuplicateEntry(entryData.firstName, entryData.lastName);
+      // Check for duplicate entry (name and email combination)
+      const existing = await storage.checkDuplicateEntry(entryData.firstName, entryData.lastName, entryData.email);
       if (existing) {
         return res.status(400).json({ 
-          message: "An entry with this first and last name combination already exists." 
+          message: "An entry with this name and email combination already exists." 
         });
       }
       
@@ -87,13 +87,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winnerEntryIds = await storage.getWinnerEntryIds();
       
       // Create CSV header
-      const csvHeader = "First Name,Last Name,Phone,Entry Time,Status\n";
+      const csvHeader = "First Name,Last Name,Email,Phone,Entry Time,Status\n";
       
       // Create CSV rows
       const csvRows = entries.map(entry => {
         const status = winnerEntryIds.includes(entry.id) ? 'Winner' : 'Eligible';
         const entryTime = new Date(entry.entryTime).toLocaleString();
-        return `"${entry.firstName}","${entry.lastName}","${entry.phone}","${entryTime}","${status}"`;
+        return `"${entry.firstName}","${entry.lastName}","${entry.email}","${entry.phone}","${entryTime}","${status}"`;
       }).join('\n');
       
       const csvContent = csvHeader + csvRows;

@@ -17,7 +17,7 @@ export interface IStorage {
   // Raffle entries
   getRaffleEntries(): Promise<RaffleEntry[]>;
   createRaffleEntry(entry: InsertRaffleEntry): Promise<RaffleEntry>;
-  checkDuplicateEntry(firstName: string, lastName: string): Promise<RaffleEntry | undefined>;
+  checkDuplicateEntry(firstName: string, lastName: string, email: string): Promise<RaffleEntry | undefined>;
   getEligibleEntries(): Promise<RaffleEntry[]>;
   markEntryAsWinner(entryId: string): Promise<void>;
   deleteRaffleEntry(entryId: string): Promise<void>;
@@ -54,14 +54,15 @@ export class DatabaseStorage implements IStorage {
     return newEntry;
   }
 
-  async checkDuplicateEntry(firstName: string, lastName: string): Promise<RaffleEntry | undefined> {
+  async checkDuplicateEntry(firstName: string, lastName: string, email: string): Promise<RaffleEntry | undefined> {
     const [existing] = await db
       .select()
       .from(raffleEntries)
       .where(
         and(
           eq(raffleEntries.firstName, firstName),
-          eq(raffleEntries.lastName, lastName)
+          eq(raffleEntries.lastName, lastName),
+          eq(raffleEntries.email, email)
         )
       );
     return existing;

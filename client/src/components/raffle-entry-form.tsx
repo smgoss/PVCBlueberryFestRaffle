@@ -14,6 +14,7 @@ import { CheckCircle, MapPin, Clock } from "lucide-react";
 const raffleEntrySchema = z.object({
   firstName: z.string().min(1, "First name is required").max(100, "First name too long"),
   lastName: z.string().min(1, "Last name is required").max(100, "Last name too long"),
+  email: z.string().email("Please enter a valid email address").max(255, "Email too long"),
   phone: z.string()
     .min(1, "Phone number is required")
     .regex(/^\d{3}-\d{3}-\d{4}$/, "Phone must be exactly 10 digits in format 555-123-4567")
@@ -32,6 +33,7 @@ export function RaffleEntryForm() {
     defaultValues: {
       firstName: "",
       lastName: "",
+      email: "",
       phone: "",
     },
   });
@@ -129,6 +131,28 @@ export function RaffleEntryForm() {
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      <i className="fas fa-envelope text-blueberry-500 mr-2"></i>
+                      Email Address
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter your email address"
+                        {...field}
+                        className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blueberry-500 focus:border-transparent"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

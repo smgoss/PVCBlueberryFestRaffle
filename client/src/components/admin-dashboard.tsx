@@ -192,6 +192,7 @@ export function AdminDashboard() {
 
   const filteredEntries = entries.filter((entry: any) =>
     `${entry.firstName} ${entry.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    entry.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     entry.phone.includes(searchTerm)
   );
 
@@ -514,6 +515,7 @@ export function AdminDashboard() {
                   <thead>
                     <tr className="bg-gray-50">
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Name</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Email</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Phone</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Entry Time</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
@@ -526,6 +528,7 @@ export function AdminDashboard() {
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {entry.firstName} {entry.lastName}
                         </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{entry.email}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{entry.phone}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">
                           {new Date(entry.entryTime).toLocaleString()}
