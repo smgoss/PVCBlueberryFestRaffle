@@ -330,10 +330,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Formatted phone for SMS: ${formattedPhone}`);
       console.log(`Message to send: ${message}`);
       
-      // Send SMS notification via Clearstream
+      // Send SMS notification via Clearstream (remove text_header to avoid emoji issues)
       const smsBody = {
         to: formattedPhone,
-        text_header: subject,
         text_body: message,
       };
       
