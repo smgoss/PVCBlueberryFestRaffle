@@ -317,8 +317,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Prepare notification messages
       const prizeText = prize ? `for the ${prize.name}` : '';
-      const subject = `🎉 Congratulations! You've Won ${prizeText}`;
-      const message = `Congratulations ${entry.firstName}! You've been selected as a winner ${prizeText} in the Pathway Vineyard Church GNG Campus Blueberry Festival Raffle! Please contact us to claim your prize. God bless!`;
+      const subject = `🎉 Pathway Vineyard Church GNG Raffle`;
+      const message = `Congratulations ${entry.firstName}! You've been selected as a winner! Visit the Pathway Vineyard Church table by the bouncy house to claim your prize.`;
       
       console.log(`Attempting to notify winner: ${entry.firstName} ${entry.lastName} (${entry.phone}, ${entry.email})`);
       console.log(`Clearstream API Key available: ${!!process.env.CLEARSTREAM_API_KEY}`);
@@ -333,6 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send SMS notification via Clearstream
       const smsBody = {
         to: formattedPhone,
+        text_header: subject,
         text_body: message,
       };
       
