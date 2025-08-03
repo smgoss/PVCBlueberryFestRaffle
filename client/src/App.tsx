@@ -8,13 +8,10 @@ import Home from "@/pages/home";
 import Admin from "@/pages/admin";
 
 function Router() {
-  // Check if user is admin
-  const isAdmin = localStorage.getItem('adminToken') === 'Jesus4All!';
-
   return (
     <Switch>
       <Route path="/" component={Home} />
-      {isAdmin && <Route path="/admin" component={Admin} />}
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
