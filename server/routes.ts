@@ -320,73 +320,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subject = `🎉 Congratulations! You've Won ${prizeText}`;
       const message = `Congratulations ${entry.firstName}! You've been selected as a winner ${prizeText} in the Pathway Vineyard Church GNG Campus Blueberry Festival Raffle! Please contact us to claim your prize. God bless!`;
       
+      console.log(`Attempting to notify winner: ${entry.firstName} ${entry.lastName} (${entry.phone}, ${entry.email})`);
+      console.log(`Clearstream API Key available: ${!!process.env.CLEARSTREAM_API_KEY}`);
+      
       // Send SMS notification via Clearstream
-      const smsResponse = await fetch('https://api.clearstream.io/v1/text_messages', {
+      const smsResponse = await fetch('https://api.getclearstream.com/v1/texts', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.CLEARSTREAM_API_KEY}`,
+          'X-Api-Key': process.env.CLEARSTREAM_API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: entry.phone.replace(/\D/g, ''), // Remove formatting, send just digits
-          message: message,
+          number: entry.phone.replace(/\D/g, ''), // Remove formatting, send just digits
+          text: message,
         }),
       });
       
-      // Send email notification via Clearstream
-      const emailResponse = await fetch('https://api.clearstream.io/v1/emails', {
+      // Send email notification via Clearstream using the messages endpoint
+      const emailResponse = await fetch('https://api.getclearstream.com/v1/messages', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.CLEARSTREAM_API_KEY}`,
+          'X-Api-Key': process.env.CLEARSTREAM_API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: entry.email,
-          subject: subject,
-          html_body: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #4F46E5;">${subject}</h2>
-              <p>Dear ${entry.firstName} ${entry.lastName},</p>
-              <p>We are thrilled to inform you that you have been selected as a winner ${prizeText} in our Blueberry Festival Raffle!</p>
-              ${prize ? `<div style="background: #F3F4F6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="margin: 0; color: #374151;">Your Prize:</h3>
-                <p style="margin: 5px 0; font-weight: bold;">${prize.name}</p>
-                ${prize.description ? `<p style="margin: 5px 0; color: #6B7280;">${prize.description}</p>` : ''}
-              </div>` : ''}
-              <p>Please contact us at your earliest convenience to arrange for prize pickup.</p>
-              <p>Thank you for participating in our Blueberry Festival Raffle!</p>
-              <p>Blessings,<br>
-              <strong>Pathway Vineyard Church GNG Campus</strong><br>
-              667 Morse Rd, New Gloucester, ME 04260</p>
-            </div>
-          `,
+          text: subject,
+          subscribers: [entry.email],
+          use_default_header: true,
         }),
       });
       
-      // Check if both notifications were successful
-      if (!smsResponse.ok || !emailResponse.ok) {
-        const smsError = !smsResponse.ok ? await smsResponse.text() : null;
-        const emailError = !emailResponse.ok ? await emailResponse.text() : null;
+      let smsSuccess = false;
+      let emailSuccess = false;
+      let errors = [];
+
+      // Check SMS response
+      if (smsResponse.ok) {
+        smsSuccess = true;
+        console.log('SMS notification sent successfully');
+      } else {
+        const smsError = await smsResponse.text();
+        console.error('SMS notification failed:', smsResponse.status, smsError);
+        errors.push(`SMS failed (${smsResponse.status}): ${smsError}`);
+      }
+
+      // Check Email response
+      if (emailResponse.ok) {
+        emailSuccess = true;
+        console.log('Email notification sent successfully');
+      } else {
+        const emailError = await emailResponse.text();
+        console.error('Email notification failed:', emailResponse.status, emailError);
+        errors.push(`Email failed (${emailResponse.status}): ${emailError}`);
+      }
+
+      // If at least one notification succeeded, mark as notified
+      if (smsSuccess || emailSuccess) {
+        // Mark winner as notified
+        await storage.markWinnerAsNotified(winnerId);
         
+        let successMessage = "Winner notified successfully";
+        if (smsSuccess && emailSuccess) {
+          successMessage += " via SMS and email";
+        } else if (smsSuccess) {
+          successMessage += " via SMS only";
+        } else {
+          successMessage += " via email only";
+        }
+        
+        res.json({ 
+          message: successMessage,
+          notifications: {
+            sms: smsSuccess ? "sent" : "failed",
+            email: emailSuccess ? "sent" : "failed"
+          },
+          errors: errors.length > 0 ? errors : undefined
+        });
+      } else {
+        // Both notifications failed
         return res.status(500).json({ 
-          message: "Failed to send notifications",
-          errors: {
-            sms: smsError,
-            email: emailError
-          }
+          message: "All notification methods failed",
+          errors: errors
         });
       }
-      
-      // Mark winner as notified
-      await storage.markWinnerAsNotified(winnerId);
-      
-      res.json({ 
-        message: "Winner notified successfully",
-        notifications: {
-          sms: "sent",
-          email: "sent"
-        }
-      });
     } catch (error) {
       console.error("Error notifying winner:", error);
       res.status(500).json({ message: "Failed to notify winner" });
