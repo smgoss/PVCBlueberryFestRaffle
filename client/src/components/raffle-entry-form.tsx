@@ -209,7 +209,7 @@ export function RaffleEntryForm() {
             <div className="text-center">
               <CheckCircle className="text-green-500 mx-auto mb-4" size={48} />
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Submission Successful!</h2>
-              <h3 className="text-xl font-semibold text-blueberry-600 mb-4">You're Invited</h3>
+              <h3 className="text-xl font-semibold text-blueberry-600 mb-4">Also, You're Invited!</h3>
               
               <div className="space-y-3 text-gray-600 mb-6">
                 <div className="flex items-center justify-center space-x-2">
