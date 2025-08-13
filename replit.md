@@ -1,111 +1,59 @@
-# Overview
+# Blueberry Festival Raffle System
 
-This is a full-stack web application for managing a church raffle system, specifically designed for Pathway Vineyard Church GNG Campus's Blueberry Festival. The application allows visitors to enter raffle drawings and provides administrators with tools to manage entries, prizes, and winner selection. The system includes automated notification capabilities to inform winners via SMS and email.
+## Overview
 
-# User Preferences
+This is a full-stack church raffle management system built for Pathway Vineyard Church GNG Campus's Blueberry Festival. The application enables visitors to enter raffle drawings for various prizes and provides administrators with tools to manage entries, prizes, and conduct drawings. The system includes automated winner notification capabilities and comprehensive administrative features for tracking the entire raffle process.
+
+## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-# System Architecture
+## System Architecture
 
-## Frontend Architecture
+### Frontend Architecture
+The client uses React 18 with TypeScript and Vite for fast development and building. The UI is built with shadcn/ui components on top of Radix UI primitives, providing accessible and customizable interface elements. Styling is handled through Tailwind CSS with custom church-themed color variables for branding consistency.
 
-**Framework & Build System**: React 18 with TypeScript using Vite as the build tool for fast development and optimized production builds.
+State management follows a modern approach using TanStack Query (React Query) for server state, eliminating the need for complex global state solutions. Client-side routing is handled by Wouter, a lightweight alternative to React Router. Form handling combines React Hook Form with Zod validation for type-safe, performant form management.
 
-**UI Framework**: Built on shadcn/ui components with Radix UI primitives, providing accessible and customizable UI components with consistent design patterns.
+### Backend Architecture
+The server runs on Node.js with Express.js framework, fully written in TypeScript using ESM modules. The API follows RESTful design principles with clear separation between public endpoints (for raffle entries) and admin-protected endpoints (for management functions).
 
-**Styling**: Tailwind CSS with custom church-themed color variables (blueberry theme) and CSS custom properties for dynamic theming.
+Authentication uses a simple bearer token system for admin access, with centralized error handling middleware providing structured error responses. Custom logging middleware tracks request/response cycles with performance metrics for debugging and monitoring.
 
-**State Management**: TanStack Query (React Query) handles all server state management, caching, and synchronization with optimized query strategies for different data types.
+### Data Layer
+The application uses PostgreSQL as the primary database, hosted on Neon Database for serverless scalability. Drizzle ORM provides type-safe database operations with full TypeScript integration. Database schema management is handled through Drizzle Kit for migrations and schema evolution.
 
-**Routing**: Wouter provides lightweight client-side routing with a simple API suitable for the application's limited route requirements.
+The schema includes four main entities: raffle_entries for participant data, prizes for available awards, winners as a junction table linking entries to prizes, and proper foreign key relationships with cascading operations. Connection pooling uses Neon's serverless driver with WebSocket support for optimal performance.
 
-**Form Handling**: React Hook Form with Zod validation ensures type-safe form handling with client-side validation and error management.
+### Authentication & Authorization
+Admin authentication relies on password-based access with hardcoded credentials for simplicity. Tokens are stored client-side in localStorage, with conditional routing based on authentication status. API security implements bearer token validation on all administrative endpoints.
 
-## Backend Architecture
+### Winner Notification System
+The system integrates with Clearstream.io for automated communication to winners. When a winner is selected, the system automatically sends both SMS and email notifications simultaneously. The database tracks notification timestamps to ensure proper communication flow and prevent duplicate messages.
 
-**Runtime & Framework**: Node.js with Express.js framework providing RESTful API endpoints with separate public and admin route handling.
+### Build and Deployment
+The application uses a monorepo structure with shared TypeScript schemas between client and server. Vite handles frontend building and development, while esbuild bundles the server for production deployment. The build process generates optimized static assets and a bundled Node.js server executable.
 
-**Language**: TypeScript with ESM modules for modern JavaScript features and type safety across the entire backend.
+## External Dependencies
 
-**API Design**: RESTful architecture with clear separation between public endpoints (raffle entry submission) and protected admin endpoints (management functions).
+**Database Services:**
+- Neon Database (PostgreSQL) - Serverless database hosting with connection pooling
+- Drizzle ORM - Type-safe database operations and schema management
 
-**Authentication**: Simple bearer token authentication for admin access with hardcoded credentials for security simplicity.
+**UI Framework:**
+- shadcn/ui - Component library built on Radix UI primitives
+- Radix UI - Accessible, unstyled UI components
+- Tailwind CSS - Utility-first CSS framework
 
-**Error Handling**: Centralized error handling middleware with structured error responses and proper HTTP status codes.
+**Communication Services:**
+- Clearstream.io - SMS and email notification service for winner notifications
 
-**Logging**: Custom request/response logging with performance metrics and structured output for debugging and monitoring.
+**Development Tools:**
+- Vite - Frontend build tool and development server
+- TypeScript - Type safety across the entire application
+- React Query (TanStack Query) - Server state management
+- React Hook Form + Zod - Form handling and validation
 
-## Data Layer
-
-**Database**: PostgreSQL hosted on Neon Database (serverless) providing scalable, managed database hosting with WebSocket support.
-
-**ORM**: Drizzle ORM with type-safe schema definitions, enabling compile-time type checking and automated type generation.
-
-**Schema Management**: Drizzle Kit handles database migrations and schema management with version control integration.
-
-**Connection**: Connection pooling using Neon's serverless driver optimized for serverless deployments with WebSocket fallback.
-
-## Database Schema Design
-
-**Core Tables**:
-- `raffle_entries`: Participant information with duplicate prevention on name/email and phone combinations
-- `prizes`: Prize catalog with availability tracking and descriptions
-- `winners`: Junction table linking entries to prizes with claim tracking and notification status
-- `Relations`: Proper foreign key relationships with cascading operations for data integrity
-
-**Duplicate Prevention**: Multi-level duplicate checking prevents the same person from entering multiple times using both name/email combinations and phone number uniqueness.
-
-## Authentication & Authorization
-
-**Admin Authentication**: Password-based authentication with bearer token generation for session management.
-
-**Token Management**: Client-side localStorage for token persistence with automatic validation on protected routes.
-
-**Route Protection**: Conditional routing and component rendering based on authentication status with proper error handling.
-
-**API Security**: Bearer token validation middleware on all admin endpoints with proper error responses for unauthorized access.
-
-## Winner Notification System
-
-**Integration**: Clearstream.io API integration for automated communication with winners through multiple channels.
-
-**Dual Channel**: Simultaneous SMS and email notifications ensure winners receive messages through their preferred communication method.
-
-**Tracking**: Database tracking of notification timestamps and delivery status for administrative oversight and follow-up capabilities.
-
-# External Dependencies
-
-## Core Dependencies
-
-**Database**: Neon Database (PostgreSQL) - Serverless PostgreSQL hosting with connection pooling and WebSocket support for modern web applications.
-
-**ORM**: Drizzle ORM with Drizzle Kit for type-safe database operations and schema management with migration support.
-
-**UI Framework**: Radix UI primitives providing accessible, unstyled UI components as the foundation for the shadcn/ui component system.
-
-**Styling**: Tailwind CSS for utility-first styling with PostCSS for processing and autoprefixer for browser compatibility.
-
-## Communication Services
-
-**Email Service**: SendGrid API integration for reliable email delivery with tracking and analytics capabilities.
-
-**SMS/Communication**: Clearstream.io API for automated SMS and email notifications to raffle winners with delivery confirmation.
-
-## Development Tools
-
-**Build System**: Vite for fast development server, hot module replacement, and optimized production builds with TypeScript support.
-
-**Validation**: Zod for runtime type validation and schema definition with React Hook Form integration for form validation.
-
-**State Management**: TanStack Query for server state management, caching, and background synchronization with React applications.
-
-**Routing**: Wouter for lightweight client-side routing with minimal bundle impact and simple API surface.
-
-## Production Infrastructure
-
-**Runtime**: Node.js runtime environment with Express.js for server-side application hosting and API endpoints.
-
-**Session Management**: connect-pg-simple for PostgreSQL-based session storage with Express session middleware integration.
-
-**Error Tracking**: Built-in error handling and logging systems for debugging and monitoring application health.
+**Runtime Environment:**
+- Node.js - Server runtime environment
+- Express.js - Web application framework

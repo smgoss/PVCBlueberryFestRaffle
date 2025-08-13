@@ -39,7 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Relations**: Proper foreign key relationships with cascading operations
 
 ### Authentication & Authorization
-- **Admin Access**: Password-based authentication with hardcoded credentials
+- **Admin Access**: Password-based authentication using environment variables
 - **Token Storage**: Client-side storage in localStorage
 - **Route Protection**: Conditional routing based on authentication status
 - **API Security**: Bearer token validation on admin endpoints

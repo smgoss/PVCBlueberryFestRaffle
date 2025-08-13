@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertRaffleEntrySchema, insertPrizeSchema, insertWinnerSchema } from "@shared/schema";
 import { z } from "zod";
 
-const ADMIN_PASSWORD = "Jesus4All!";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Jesus4All!";
 
 // Admin authentication middleware
 const requireAdmin = (req: any, res: any, next: any) => {
