@@ -1,92 +1,111 @@
-# Blueberry Festival Raffle System
+# Overview
 
-## Overview
+This is a full-stack web application for managing a church raffle system, specifically designed for Pathway Vineyard Church GNG Campus's Blueberry Festival. The application allows visitors to enter raffle drawings and provides administrators with tools to manage entries, prizes, and winner selection. The system includes automated notification capabilities to inform winners via SMS and email.
 
-This is a full-stack web application for managing a church raffle system, specifically for Pathway Vineyard Church GNG Campus's Blueberry Festival. The application allows visitors to enter raffle drawings and provides administrative capabilities for managing entries, prizes, and winners. Built as a modern React frontend with an Express.js backend, it features a clean, church-themed UI with comprehensive raffle management functionality and integrated Clearstream.io notifications for winner communications.
-
-## User Preferences
+# User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## System Architecture
+# System Architecture
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript using Vite as the build tool
-- **UI Framework**: shadcn/ui components built on Radix UI primitives
-- **Styling**: Tailwind CSS with custom church-themed color variables
-- **State Management**: TanStack Query (React Query) for server state management
-- **Routing**: Wouter for lightweight client-side routing
-- **Forms**: React Hook Form with Zod validation for type-safe form handling
+## Frontend Architecture
 
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ESM modules
-- **API Design**: RESTful API with separate public and admin endpoints
-- **Authentication**: Simple bearer token authentication for admin access
-- **Error Handling**: Centralized error handling middleware with structured error responses
-- **Logging**: Custom request/response logging with performance metrics
+**Framework & Build System**: React 18 with TypeScript using Vite as the build tool for fast development and optimized production builds.
 
-### Data Layer
-- **Database**: PostgreSQL via Neon Database (serverless)
-- **ORM**: Drizzle ORM with type-safe schema definitions
-- **Schema Management**: Drizzle Kit for migrations and schema management
-- **Connection**: Connection pooling using Neon's serverless driver with WebSocket support
+**UI Framework**: Built on shadcn/ui components with Radix UI primitives, providing accessible and customizable UI components with consistent design patterns.
 
-### Database Schema Design
-- **raffle_entries**: Stores participant information (name, phone) with duplicate prevention
-- **prizes**: Manages available prizes with availability status
-- **winners**: Junction table linking entries to prizes with claim tracking
-- **Relations**: Proper foreign key relationships with cascading operations
+**Styling**: Tailwind CSS with custom church-themed color variables (blueberry theme) and CSS custom properties for dynamic theming.
 
-### Authentication & Authorization
-- **Admin Access**: Password-based authentication with hardcoded credentials
-- **Token Storage**: Client-side storage in localStorage
-- **Route Protection**: Conditional routing based on authentication status
-- **API Security**: Bearer token validation on admin endpoints
+**State Management**: TanStack Query (React Query) handles all server state management, caching, and synchronization with optimized query strategies for different data types.
 
-### Winner Notification System
-- **Clearstream.io Integration**: Automated SMS and email notifications to winners
-- **Dual Channel Communication**: Sends both text messages and emails simultaneously
-- **Notification Tracking**: Database tracking of when winners are notified
-- **Professional Templates**: Church-branded messages with prize details and contact information
-- **Error Handling**: Comprehensive error handling and user feedback for notification failures
+**Routing**: Wouter provides lightweight client-side routing with a simple API suitable for the application's limited route requirements.
 
-### UI/UX Design Patterns
-- **Design System**: Consistent component library with church branding
-- **Responsive Design**: Mobile-first approach with adaptive layouts
-- **Color Scheme**: Custom blueberry and church-themed color palette
-- **Accessibility**: Radix UI primitives ensure good accessibility practices
-- **Loading States**: Proper loading and error states throughout the application
+**Form Handling**: React Hook Form with Zod validation ensures type-safe form handling with client-side validation and error management.
 
-### Development & Build Process
-- **Development**: Hot reload with Vite development server
-- **Build**: Separate client and server builds with esbuild for backend
-- **Type Safety**: Full TypeScript coverage across frontend, backend, and shared types
-- **Linting**: ESM modules with strict TypeScript configuration
+## Backend Architecture
 
-## External Dependencies
+**Runtime & Framework**: Node.js with Express.js framework providing RESTful API endpoints with separate public and admin route handling.
 
-### Database Services
-- **Neon Database**: Serverless PostgreSQL hosting with connection pooling
-- **WebSocket Support**: Real-time database connections via ws library
+**Language**: TypeScript with ESM modules for modern JavaScript features and type safety across the entire backend.
 
-### UI Component Libraries
-- **Radix UI**: Accessible component primitives for complex UI elements
-- **Lucide React**: Icon library for consistent iconography
-- **Tailwind CSS**: Utility-first CSS framework for styling
+**API Design**: RESTful architecture with clear separation between public endpoints (raffle entry submission) and protected admin endpoints (management functions).
 
-### Form & Validation
-- **React Hook Form**: Performant form library with minimal re-renders
-- **Zod**: TypeScript-first schema validation library
-- **@hookform/resolvers**: Integration between React Hook Form and Zod
+**Authentication**: Simple bearer token authentication for admin access with hardcoded credentials for security simplicity.
 
-### Development Tools
-- **Vite**: Fast build tool with hot module replacement
-- **ESBuild**: Fast JavaScript bundler for production builds
-- **Drizzle Kit**: Database migration and introspection tool
-- **TypeScript**: Static type checking and enhanced developer experience
+**Error Handling**: Centralized error handling middleware with structured error responses and proper HTTP status codes.
 
-### Utility Libraries
-- **date-fns**: Date manipulation and formatting
-- **clsx & class-variance-authority**: Conditional CSS class management
-- **nanoid**: Secure unique ID generation
+**Logging**: Custom request/response logging with performance metrics and structured output for debugging and monitoring.
+
+## Data Layer
+
+**Database**: PostgreSQL hosted on Neon Database (serverless) providing scalable, managed database hosting with WebSocket support.
+
+**ORM**: Drizzle ORM with type-safe schema definitions, enabling compile-time type checking and automated type generation.
+
+**Schema Management**: Drizzle Kit handles database migrations and schema management with version control integration.
+
+**Connection**: Connection pooling using Neon's serverless driver optimized for serverless deployments with WebSocket fallback.
+
+## Database Schema Design
+
+**Core Tables**:
+- `raffle_entries`: Participant information with duplicate prevention on name/email and phone combinations
+- `prizes`: Prize catalog with availability tracking and descriptions
+- `winners`: Junction table linking entries to prizes with claim tracking and notification status
+- `Relations`: Proper foreign key relationships with cascading operations for data integrity
+
+**Duplicate Prevention**: Multi-level duplicate checking prevents the same person from entering multiple times using both name/email combinations and phone number uniqueness.
+
+## Authentication & Authorization
+
+**Admin Authentication**: Password-based authentication with bearer token generation for session management.
+
+**Token Management**: Client-side localStorage for token persistence with automatic validation on protected routes.
+
+**Route Protection**: Conditional routing and component rendering based on authentication status with proper error handling.
+
+**API Security**: Bearer token validation middleware on all admin endpoints with proper error responses for unauthorized access.
+
+## Winner Notification System
+
+**Integration**: Clearstream.io API integration for automated communication with winners through multiple channels.
+
+**Dual Channel**: Simultaneous SMS and email notifications ensure winners receive messages through their preferred communication method.
+
+**Tracking**: Database tracking of notification timestamps and delivery status for administrative oversight and follow-up capabilities.
+
+# External Dependencies
+
+## Core Dependencies
+
+**Database**: Neon Database (PostgreSQL) - Serverless PostgreSQL hosting with connection pooling and WebSocket support for modern web applications.
+
+**ORM**: Drizzle ORM with Drizzle Kit for type-safe database operations and schema management with migration support.
+
+**UI Framework**: Radix UI primitives providing accessible, unstyled UI components as the foundation for the shadcn/ui component system.
+
+**Styling**: Tailwind CSS for utility-first styling with PostCSS for processing and autoprefixer for browser compatibility.
+
+## Communication Services
+
+**Email Service**: SendGrid API integration for reliable email delivery with tracking and analytics capabilities.
+
+**SMS/Communication**: Clearstream.io API for automated SMS and email notifications to raffle winners with delivery confirmation.
+
+## Development Tools
+
+**Build System**: Vite for fast development server, hot module replacement, and optimized production builds with TypeScript support.
+
+**Validation**: Zod for runtime type validation and schema definition with React Hook Form integration for form validation.
+
+**State Management**: TanStack Query for server state management, caching, and background synchronization with React applications.
+
+**Routing**: Wouter for lightweight client-side routing with minimal bundle impact and simple API surface.
+
+## Production Infrastructure
+
+**Runtime**: Node.js runtime environment with Express.js for server-side application hosting and API endpoints.
+
+**Session Management**: connect-pg-simple for PostgreSQL-based session storage with Express session middleware integration.
+
+**Error Tracking**: Built-in error handling and logging systems for debugging and monitoring application health.
